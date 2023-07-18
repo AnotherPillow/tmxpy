@@ -2,35 +2,40 @@ import bs4
 from pathlib import Path
 from PIL import Image
 import os
+from collections.abc import Sequence
+from typing import cast
 
 # def hello(string: str) -> str:
 #     """Returns a string with a greeting."""
 #     return f"Hello, {string}!"
 
 class TMXpy:
-    spriteSheetFolderPaths: list[Path] = []
-    inputFile: bs4.BeautifulSoup = None
+    spriteSheetFolderPaths: Sequence[Path|str] = []
+    inputFile: bs4.BeautifulSoup
     tileDimensions: tuple[int, int] = (0, 0)
     tmxDimensions: tuple[int, int] = (0, 0)
     tiles: dict = {}
 
-    def __init__(self, sheets: list[Path] or list[str], path: str = None, xml: str = None):
+    def __init__(self, sheets: Sequence[Path|str], path: str | Path = '', xml: str = ''):
         """Initializes the TMXpy class"""
         
-        if path != None:
+        if path != '':
             self.path = path
             self.inputFile = bs4.BeautifulSoup(open(path), "xml")
-        elif xml != None:
+        elif xml != '':
             self.inputFile = bs4.BeautifulSoup(xml, "xml")
         else:
             raise Exception("TMXpy: No path or xml given")
 
         self.spriteSheetFolderPaths = sheets
     
-    def generateGIDDict(self) -> dict:
+    def generateGIDDict(self) -> None:
         """Generates a dictionary of GIDs to tile information"""
         tilesets = self.inputFile.find_all("tileset")
-        layer1 = self.inputFile.find('layer')
+        layer1 = cast(dict, self.inputFile.find('layer'))
+
+        
+
         self.tmxDimensions = (int(layer1['width']), int(layer1['height']))
         for tileset in tilesets:
             self.tileDimensions = (int(tileset["tilewidth"]), int(tileset["tileheight"]))
@@ -46,7 +51,7 @@ class TMXpy:
                     "height": int(tileset["tileheight"])
                 }
 
-    def renderTile(self, gid: str) -> Image:
+    def renderTile(self, gid: str) -> Image.Image:
         """Renders a tile from the TMX file"""
         tile = self.tiles[gid]
         
@@ -62,7 +67,7 @@ class TMXpy:
         tile = tilesheet.crop((tile["x"] * tile["width"], tile["y"] * tile["height"], tile["x"] * tile["width"] + tile["width"], tile["y"] * tile["height"] + tile["height"]))
         return tile
 
-    def renderLayer(self, layerID: int) -> str:
+    def renderLayer(self, layerID: int) -> Image.Image:
         """Renders a layer in the TMX file"""
         
         layers = self.inputFile.find_all("layer")
@@ -83,7 +88,7 @@ class TMXpy:
 
         return img
     
-    def renderAllLayers(self, blocked: list[str] = []) -> str:
+    def renderAllLayers(self, blocked: list[str] = []) -> Image.Image:
         """Renders all layers in the TMX file, except for the ones in the blocked list"""
         width = int(self.tmxDimensions[0]) * int(self.tileDimensions[0])
         height = int(self.tmxDimensions[1]) * int(self.tileDimensions[1])

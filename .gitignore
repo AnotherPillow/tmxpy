@@ -1,0 +1,7 @@
+.env
+render*.png
+*.tmx
+
+**/__pycache__/
+dist/
+*.egg-info/

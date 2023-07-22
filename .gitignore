@@ -1,5 +1,6 @@
 .env
 render*.png
+tests/*.json
 *.tmx
 
 **/__pycache__/

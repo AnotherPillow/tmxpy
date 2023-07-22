@@ -4,13 +4,13 @@ from pathlib import Path
 
 #sys.path.append('..')
 
-#from src.tmxpy import TMXpy#, hello#
-from tmxpy import TMXpy
+from src.tmxpy import TMXpy#, hello#
+#from tmxpy import TMXpy
 
 #parser = argparse.ArgumentParser(description='Render a TMX file.')
 #parser.add_argument('map', metavar='map', type=str, nargs=1, help='The path to the TMX file to render.')
 
-MAP_PATH = 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Stardew Valley\\Content (unpacked)\\Maps'
+from .common import MAP_PATH
 
 def farm():
     tmx = TMXpy(
@@ -43,7 +43,10 @@ def render(name: str):
     # print(randomlySelectedTile)
 
     #tmx.renderLayer(1).save("tests\\render.png")
-    tmx.renderAllLayers(blocked=['3']).save(f"tests\\render-{name}.png")
+    tmx.renderAllLayers(blocked=['Paths']).save(f"tests\\render-{name}.png")
 
-for x in ['SeedShop']:
+#for x in ['AnimalShop', 'Beach', 'Darkroom', 'Desert', 'Town', 'Farm', 'FarmCave']:
+for x in ['Farm']:
     render(x)
+
+

@@ -9,6 +9,33 @@ from typing import cast
 #     """Returns a string with a greeting."""
 #     return f"Hello, {string}!"
 
+def convertMapNameToFile(name: str) -> str:
+    match name:
+        case "IslandSouth":
+            return "Island_S"
+        case "IslandWest":
+            return "Island_W"
+        case "IslandNorth":
+            return "Island_N"
+        case "IslandEast":
+            return "Island_E"
+        case "IslandFarmCave":
+            return "Island_FarmCave"
+        case "CaptainRoom":
+            return "Island_CaptainRoom"
+        case "IslandSouthEast":
+            return "Island_SE"
+        case "IslandFieldOffice":
+            return "Island_FieldOffice"
+        case "IslandHut":
+            return "Island_Hut"
+        case "IslandShrine":
+            return "Island_Shrine"
+        case _:
+            return name
+        
+
+
 class TMXpy:
     spriteSheetFolderPaths: Sequence[Path|str] = []
     inputFile: bs4.BeautifulSoup
@@ -28,6 +55,7 @@ class TMXpy:
             raise Exception("TMXpy: No path or xml given")
 
         self.spriteSheetFolderPaths = sheets
+
     
     def generateGIDDict(self) -> None:
         """Generates a dictionary of GIDs to tile information"""
@@ -107,17 +135,43 @@ class TMXpy:
             img.paste(layer, (0, 0), layer)
             print(f'Layer {i} rendered, layer width: {layer.width}, layer height: {layer.height} - img width: {width}, img height: {height}')
         return img
-            
-
-
-
-        
-        
-
-
-        
-
-
-
     
+    def parseWarps(self) -> list[dict]:
+        #extract property[name="Warp"]
+        prop = cast(dict, self.inputFile.find("property", {"name": "Warp"}))
+        if prop is None or prop == {}:
+            return []
+        
+        value = prop["value"].split(" ")
+
+        #seperate value into a list of warps, each is 5 elements long
+        warps_list = [value[i:i + 5] for i in range(0, len(value), 5)]
+
+        warps = []
+        for warp in warps_list:
+            warps.append({
+                "map_x": int(warp[0]),
+                "map_y": int(warp[1]),
+                "destination": warp[2],
+                "dest_x": int(warp[3]),
+                "dest_y": int(warp[4]),
+            })
+
+        self.warps = warps
+
+        return warps
     
+    def replace_warp(self, index: int, warp: dict):
+        if 'warps' not in self.__dict__:
+            self.parseWarps()
+        self.warps[index] = warp
+
+
+    def save(self, path: str or Path):
+
+        self.inputFile.find("property", {"name": "Warp"})['value'] = " ".join([f"{w['map_x']} {w['map_y']} {w['destination']} {w['dest_x']} {w['dest_y']}" for w in self.warps]) # type: ignore
+
+        with open(path, "w") as f:
+            f.write(self.inputFile.prettify())
+
+

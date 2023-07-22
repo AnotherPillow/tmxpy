@@ -1,1 +1,1 @@
-from .tmxpy import TMXpy
+from .tmxpy import TMXpy, convertMapNameToFile

@@ -7,6 +7,8 @@ This library is fairly computer intensive, especially when rendering large maps.
 ## Features
 
 - Rendering of TMX files to images (CSV encoding only)
+- Replacing specific warps with other warps
+- Changing tiles of a TMX file
 
 ## Installation
 
@@ -14,7 +16,7 @@ This library is fairly computer intensive, especially when rendering large maps.
 pip install tmxpy
 ```
 
-## Usage
+## Usage and Examples
 
 ```python
 from tmxpy import TMXpy
@@ -23,7 +25,21 @@ from pathlib import Path
 tmx = TMXpy(sheets=[Path("path/to/tilesheet/directory")], path=Path("path/to/tmx/file"))
 tmx.generateGIDDict()
 tmx.renderAllLayers().save("path/to/output/image.png")
+
+tmx.parseWarps()
+tmx.replace_warp(0, {
+    "map_x": 23,
+    "map_y": 17,
+    "destination": "Town",
+    "dest_x": 10,
+    "dest_y": 8,
+})
+
+tmx.setTile(23, 17, "129", layerName="Buildings")
+
 ```
+
+Further examples can be found in the tests folder.
 
 ## Development/Testing
 

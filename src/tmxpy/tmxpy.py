@@ -33,8 +33,6 @@ def convertMapNameToFile(name: str) -> str:
             return "Island_Shrine"
         case _:
             return name
-        
-
 
 class TMXpy:
     spriteSheetFolderPaths: Sequence[Path|str] = []
@@ -112,6 +110,8 @@ class TMXpy:
             tile = tile.strip()
             if tile == "0":
                 continue
+            if '\n' in tile:
+                tile = tile.split('\n')[0].strip()
             img.paste(self.renderTile(tile), (int(i % int(layer['width'])) * int(self.tileDimensions[0]), int(i / int(layer['width'])) * int(self.tileDimensions[1])))
 
         return img
@@ -127,13 +127,13 @@ class TMXpy:
         
         for i, layer in enumerate(self.inputFile.find_all("layer")):
             if layer['name'] in blocked or str(i) in blocked or i in blocked:
-                print(f'Skipping layer {layer["name"]} - {i}')
+                # print(f'Skipping layer {layer["name"]} - {i}')
                 continue
-            print(f'Rendering layer {layer["name"]} - {i}')
+            # print(f'Rendering layer {layer["name"]} - {i}')
             layer = self.renderLayer(i)
             #stick it on top of the last layer, and not overwriting the transparent pixels
             img.paste(layer, (0, 0), layer)
-            print(f'Layer {i} rendered, layer width: {layer.width}, layer height: {layer.height} - img width: {width}, img height: {height}')
+            # print(f'Layer {i} rendered, layer width: {layer.width}, layer height: {layer.height} - img width: {width}, img height: {height}')
         return img
     
     def parseWarps(self) -> list[dict]:
@@ -166,10 +166,32 @@ class TMXpy:
             self.parseWarps()
         self.warps[index] = warp
 
+    def setTile(self, x: int, y: int, tile: str, layerID: int = -1, layerName: str = "") -> None:
+        """Sets a tile in the TMX file"""
+        if layerID > -1:
+            layer = self.inputFile.find("layer", {"id": str(layerID)})
+        elif layerName != "":
+            layer = self.inputFile.find("layer", {"name": layerName})
+        else:
+            raise Exception("TMXpy: No layerID or layerName given")
+        if layer is None:
+            raise Exception("TMXpy: Layer not found")
+        
+        rows = layer.text.split("\n")
+        columns = rows[y].split(",")
+        
+        columns[x] = tile
+        rows[y] = ",".join(columns)
+        output = "\n".join(rows)
+        
+        layer.contents[0].replace_with(output) # type: ignore <-- like wtf pylint why what is this
+        
+        
 
     def save(self, path: str or Path):
 
-        self.inputFile.find("property", {"name": "Warp"})['value'] = " ".join([f"{w['map_x']} {w['map_y']} {w['destination']} {w['dest_x']} {w['dest_y']}" for w in self.warps]) # type: ignore
+        if 'warps' in self.__dict__:
+            self.inputFile.find("property", {"name": "Warp"})['value'] = " ".join([f"{w['map_x']} {w['map_y']} {w['destination']} {w['dest_x']} {w['dest_y']}" for w in self.warps]) # type: ignore
 
         with open(path, "w") as f:
             f.write(self.inputFile.prettify())

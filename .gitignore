@@ -1,5 +1,5 @@
 .env
-render*.png
+tests/*.png
 tests/*.json
 *.tmx
 

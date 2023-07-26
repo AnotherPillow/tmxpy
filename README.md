@@ -39,7 +39,7 @@ tmx.setTile(23, 17, "129", layerName="Buildings")
 
 ```
 
-Further examples can be found in the tests folder.
+Further examples can be found in the [tests](https://github.com/AnotherPillow/tmxpy/tree/main/tests) directory.
 
 ## Development/Testing
 

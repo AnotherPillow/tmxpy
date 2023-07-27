@@ -4,11 +4,14 @@ A Python library for reading and writing TMX files.
 
 This library is fairly computer intensive, especially when rendering large maps. It is recommended to use a computer with decent specs when using this library.
 
+**Please note**: This library only supports files saved with the CSV encoding.
+
 ## Features
 
-- Rendering of TMX files to images (CSV encoding only)
+- Rendering of TMX files to images
 - Replacing specific warps with other warps
 - Changing tiles of a TMX file
+- Adding tilesets to a TMX file
 
 ## Installation
 

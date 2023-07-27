@@ -40,6 +40,7 @@ class TMXpy:
     tileDimensions: tuple[int, int] = (0, 0)
     tmxDimensions: tuple[int, int] = (0, 0)
     tiles: dict = {}
+    maxGID: int = 0
 
     def __init__(self, sheets: Sequence[Path|str], path: str | Path = '', xml: str = ''):
         """Initializes the TMXpy class"""
@@ -77,17 +78,30 @@ class TMXpy:
                     "height": int(tileset["tileheight"])
                 }
 
+        self.maxGID = len(self.tiles)
+
+    def findPathOfTileSheet(self, sheet: str, ext: str = '') -> str:
+        """Finds the folder containing the given sheet"""
+        for path in self.spriteSheetFolderPaths:
+            fullpath = self.addExtIfNeeded(os.path.join(path, sheet), ext)
+            if os.path.exists(fullpath):
+                return str(fullpath)
+        else:
+            raise Exception(f"TMXpy: Could not find tileset {sheet} in any of the given paths {self.spriteSheetFolderPaths}")
+        
+    def addExtIfNeeded(self, path: str, ext: str) -> str:
+        """Adds an extension to a path if it doesn't have it"""
+        if not path.endswith(ext):
+            path += ext
+        return path
+        
+
     def renderTile(self, gid: str) -> Image.Image:
         """Renders a tile from the TMX file"""
         tile = self.tiles[gid]
         
         #path = os.path.join(self.spriteSheetFolderPaths[0], tile["src"]) + ".png"
-        for path in self.spriteSheetFolderPaths:
-            if os.path.exists(os.path.join(path, tile["src"] + ".png")):
-                path = os.path.join(path, tile["src"]) + ".png"
-                break
-        else:
-            raise Exception(f"TMXpy: Could not find tileset {tile['src']} in any of the given paths {self.spriteSheetFolderPaths}")
+        path = self.findPathOfTileSheet(tile["src"], ".png")
         tilesheet = Image.open(path)
         
         tile = tilesheet.crop((tile["x"] * tile["width"], tile["y"] * tile["height"], tile["x"] * tile["width"] + tile["width"], tile["y"] * tile["height"] + tile["height"]))
@@ -185,8 +199,59 @@ class TMXpy:
         output = "\n".join(rows)
         
         layer.contents[0].replace_with(output) # type: ignore <-- like wtf pylint why what is this
+
+    def addTilesheet(self, filename: str, setname: str, tileproperties: dict[str, list]) -> None:
+        #loop through the sheet dirs, check if filename exists in any of them
+        imgpath = self.findPathOfTileSheet(filename, ".png")
+        img = Image.open(imgpath)
         
+        width_tiles = img.width // 16
+        height_tiles = img.height // 16
+
+        elm = self.inputFile.new_tag("tileset", 
+            attrs={
+                "name": setname,
+                "tilewidth": "16",
+                "tileheight": "16",
+                "tilecount": str(width_tiles * height_tiles),
+                "columns": str(width_tiles),
+                "firstgid": str(self.maxGID + 1)
+            })
         
+        imgelm = self.inputFile.new_tag("image",
+            attrs={
+                "source": filename,
+                "width": str(img.width),
+                "height": str(img.height)
+            }
+        )
+
+        elm.append(imgelm)
+        
+        for tile in tileproperties: #iter through dict
+            tileelm = self.inputFile.new_tag("tile", id=tile)
+            propselm = self.inputFile.new_tag("properties")
+
+            for prop in tileproperties[tile]: #iter through list in dict (key for list is tile id)
+                #dict would be like {tile_id: [{name: "name", value: "value", type: "type"}, ...]}
+                propelm = self.inputFile.new_tag("property",
+                    attrs={
+                        "name": prop['name'],
+                        "value": tileproperties[tile][prop]['value'],
+                        "type": tileproperties[tile][prop]['type']
+                    }
+                )
+                propselm.append(propelm)
+
+            tileelm.append(propselm)
+            elm.append(tileelm)
+
+        map = self.inputFile.map
+        if map is None:
+            raise Exception("TMXpy: No map element found")
+        
+        map.append(elm)
+
 
     def save(self, path: str or Path):
 

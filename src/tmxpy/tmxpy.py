@@ -52,6 +52,14 @@ class TMXpy:
             self.inputFile = bs4.BeautifulSoup(xml, "xml")
         else:
             raise Exception("TMXpy: No path or xml given")
+        
+        map = self.inputFile.find("map")
+        if map is None:
+            raise Exception("TMXpy: No map element found")
+        
+        map = cast(dict, map)
+
+        self.tmxDimensions = (int(map['width']), int(map['height']))
 
         self.spriteSheetFolderPaths = sheets
 
@@ -59,11 +67,8 @@ class TMXpy:
     def generateGIDDict(self) -> None:
         """Generates a dictionary of GIDs to tile information"""
         tilesets = self.inputFile.find_all("tileset")
-        layer1 = cast(dict, self.inputFile.find('layer'))
 
-        
 
-        self.tmxDimensions = (int(layer1['width']), int(layer1['height']))
         for tileset in tilesets:
             self.tileDimensions = (int(tileset["tilewidth"]), int(tileset["tileheight"]))
             src = tileset.find("image")["source"]

@@ -98,7 +98,12 @@ class TMXpy:
 
     def renderTile(self, gid: str) -> Image.Image:
         """Renders a tile from the TMX file"""
-        tile = self.tiles[gid]
+        try:
+            tile = self.tiles[gid]
+        except KeyError:
+            # print(gid, self.tiles)
+            if str(gid) == "0":
+                return Image.new("RGBA", self.tileDimensions)
         
         #path = os.path.join(self.spriteSheetFolderPaths[0], tile["src"]) + ".png"
         path = self.findPathOfTileSheet(tile["src"], ".png")
@@ -191,7 +196,7 @@ class TMXpy:
         if layer is None:
             raise Exception("TMXpy: Layer not found")
         
-        rows = layer.text.split("\n")
+        rows = [x for x in layer.text.split("\n") if str(x) not in ["", " ", [], [""], [" "]]]
         columns = rows[y].split(",")
         
         columns[x] = tile

@@ -104,6 +104,8 @@ class TMXpy:
             # print(gid, self.tiles)
             if str(gid) == "0":
                 return Image.new("RGBA", self.tileDimensions)
+            
+            raise Exception(f"TMXpy: Tile {gid} not found in tileset")
         
         #path = os.path.join(self.spriteSheetFolderPaths[0], tile["src"]) + ".png"
         path = self.findPathOfTileSheet(tile["src"], ".png")

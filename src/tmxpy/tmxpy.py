@@ -138,7 +138,18 @@ class TMXpy:
                 continue
             if '\n' in tile:
                 tile = tile.split('\n')[0].strip()
-            img.paste(self.renderTile(tile), (int(i % int(layer['width'])) * int(self.tileDimensions[0]), int(i / int(layer['width'])) * int(self.tileDimensions[1])))
+            
+            render = self.renderTile(tile)
+            alpha = render.getchannel('A')
+            
+            img.paste(
+                self.renderTile(tile), 
+                (
+                    int(i % int(layer['width'])) * int(self.tileDimensions[0]),
+                    int(i / int(layer['width'])) * int(self.tileDimensions[1])
+                ),
+                alpha
+            )
 
         return img
     
@@ -146,7 +157,7 @@ class TMXpy:
         """Renders all layers in the TMX file, except for the ones in the blocked list"""
         width = int(self.tmxDimensions[0]) * int(self.tileDimensions[0])
         height = int(self.tmxDimensions[1]) * int(self.tileDimensions[1])
-        img = Image.new("RGBA", (width, height))
+        img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
 
 
 
@@ -158,7 +169,7 @@ class TMXpy:
             # print(f'Rendering layer {layer["name"]} - {i}')
             layer = self.renderLayer(i)
             #stick it on top of the last layer, and not overwriting the transparent pixels
-            img.paste(layer, (0, 0), layer)
+            img.paste(layer, (0, 0), layer.getchannel('A'))
             # print(f'Layer {i} rendered, layer width: {layer.width}, layer height: {layer.height} - img width: {width}, img height: {height}')
         return img
     

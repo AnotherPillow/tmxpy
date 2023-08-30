@@ -41,6 +41,8 @@ class TMXpy:
     tmxDimensions: tuple[int, int] = (0, 0)
     tiles: dict = {}
     maxGID: int = 0
+    warps: list[dict[str, int | str]] = []
+    path: str | Path = ''
 
     def __init__(self, sheets: Sequence[Path|str], path: str | Path = '', xml: str = ''):
         """Initializes the TMXpy class"""

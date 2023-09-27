@@ -39,6 +39,7 @@ class TMXpy:
     inputFile: bs4.BeautifulSoup
     tileDimensions: tuple[int, int] = (0, 0)
     tmxDimensions: tuple[int, int] = (0, 0)
+    trueGIDDict: dict = {}
     tiles: dict = {}
     maxGID: int = 0
     warps: list[dict[str, int | str]] = []
@@ -83,6 +84,10 @@ class TMXpy:
                     "y": int((i - int(tileset["firstgid"])) / int(tileset["columns"])),
                     "width": int(tileset["tilewidth"]),
                     "height": int(tileset["tileheight"])
+                }
+                self.trueGIDDict[f'{src}@{i}'] = {
+                    "tile": self.tiles[str(i)],
+                    "gid": i,
                 }
 
         self.maxGID = len(self.tiles)

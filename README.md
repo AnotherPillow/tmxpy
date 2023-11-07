@@ -4,7 +4,7 @@ A Python library for reading and writing TMX files.
 
 This library is fairly computer intensive, especially when rendering large maps. It is recommended to use a computer with decent specs when using this library.
 
-**Please note**: This library only supports files saved with the CSV encoding.
+**Please note**: This library only supports files saved with the CSV encoding, though XML-encoded files can be converted with `tmxpy.XMLtoCSV`
 
 ## Features
 

@@ -2,12 +2,55 @@ import bs4
 from pathlib import Path
 from PIL import Image
 import os
+import re
 from collections.abc import Sequence
-from typing import cast
+from typing import cast, Literal
 
 # def hello(string: str) -> str:
 #     """Returns a string with a greeting."""
 #     return f"Hello, {string}!"
+
+def XMLtoCSV(inPath: str, outPath: str | None, outputType: Literal['file', 'text'] = 'file') -> None | str:  
+    """Converts an XML-encoded TMX file to CSV formatting."""
+    soup = bs4.BeautifulSoup(open(inPath), "xml")
+    
+    for layer in soup.find_all('layer'):
+        layer = cast(bs4.Tag, layer)
+        props = cast(bs4.Tag, layer.find('properties'))
+        if len(props.attrs) == 1:
+            props.clear()
+
+        width = int(layer.attrs['width'])
+        
+        data = cast(bs4.Tag, layer.find('data'))
+
+        tiles = layer.findAll('tile')
+        csv_oneline = ''
+        for tile in tiles:
+            tile = str(tile)
+            sub = re.sub(r'<tile gid="(\d+)" ?/>', r'\1,', tile)
+            csv_oneline += sub
+
+        csv_oneline_split = csv_oneline.split(',')
+        for i, _el in enumerate(csv_oneline_split):
+            if i % width == 0 and not i >= len(csv_oneline_split) - 1 and i > 2:
+                csv_oneline_split[i + 1] = '\n' + csv_oneline_split[i + 1]
+
+        csv = ','.join(csv_oneline_split)
+
+        data.string = csv
+        data.attrs['encoding'] = 'csv'
+
+    if outputType == 'file':
+        if outPath:
+            open(outPath, 'w').write(str(soup))
+            return None
+        else:
+            raise ValueError('outPath must be non-null with file outputType.')
+    else:
+        return str(soup)
+            
+
 
 def convertMapNameToFile(name: str) -> str:
     match name:

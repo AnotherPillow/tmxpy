@@ -17,7 +17,10 @@ def XMLtoCSV(inPath: str, outPath: str | None, outputType: Literal['file', 'text
     for layer in soup.find_all('layer'):
         layer = cast(bs4.Tag, layer)
         props = cast(bs4.Tag, layer.find('properties'))
-        if props.attrs == None:
+        
+        if props == None:
+            props.clear()
+        elif props.attrs == None:
             props.clear()
         elif len(props.attrs) == 1:
             props.clear()

@@ -18,12 +18,11 @@ def XMLtoCSV(inPath: str, outPath: str | None, outputType: Literal['file', 'text
         layer = cast(bs4.Tag, layer)
         props = cast(bs4.Tag, layer.find('properties'))
         
-        if props == None:
-            props.clear()
-        elif props.attrs == None:
-            props.clear()
-        elif len(props.attrs) == 1:
-            props.clear()
+        if props != None:
+            if props.attrs == None:
+                props.clear()
+            elif len(props.attrs) == 1:
+                props.clear()
 
         width = int(layer.attrs['width'])
         

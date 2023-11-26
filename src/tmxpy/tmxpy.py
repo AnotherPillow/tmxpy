@@ -124,7 +124,6 @@ class TMXpy:
             src = tileset.find("image")["source"]
 
             for i in range(int(tileset["firstgid"]), int(tileset["tilecount"]) + int(tileset["firstgid"])):
-                #<tileset firstgid="33" name="untitled tile sheet" tilewidth="16" tileheight="16" tilecount="1975" columns="25">
                 self.tiles[str(i)] = {
                     "src": src,
                     "x": int((i - int(tileset["firstgid"])) % int(tileset["columns"])),
@@ -160,13 +159,11 @@ class TMXpy:
         try:
             tile = self.tiles[gid]
         except KeyError:
-            # print(gid, self.tiles)
             if str(gid) == "0":
                 return Image.new("RGBA", self.tileDimensions)
             
             raise Exception(f"TMXpy: Tile {gid} not found in tileset")
         
-        #path = os.path.join(self.spriteSheetFolderPaths[0], tile["src"]) + ".png"
         path = self.findPathOfTileSheet(tile["src"], ".png")
         tilesheet = Image.open(path)
         
@@ -177,9 +174,7 @@ class TMXpy:
         """Renders a layer in the TMX file"""
         
         layers = self.inputFile.find_all("layer")
-        # print(layers)
         layer = layers[layerID]
-        # self.tmxDimensions = (int(layer['width']), int(layer['height']))
         tiles = layer.text.split(",")
 
         img = Image.new("RGBA", 
@@ -235,7 +230,6 @@ class TMXpy:
         
         value = prop["value"].split(" ")
 
-        #seperate value into a list of warps, each is 5 elements long
         warps_list = [value[i:i + 5] for i in range(0, len(value), 5)]
 
         warps = []
@@ -310,7 +304,6 @@ class TMXpy:
             propselm = self.inputFile.new_tag("properties")
 
             for prop in tileproperties[tile]: #iter through list in dict (key for list is tile id)
-                #dict would be like {tile_id: [{name: "name", value: "value", type: "type"}, ...]}
                 propelm = self.inputFile.new_tag("property",
                     attrs={
                         "name": prop['name'],

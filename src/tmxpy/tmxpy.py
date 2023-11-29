@@ -92,6 +92,8 @@ class TMXpy:
     warps: list[dict[str, int | str]] = []
     path: str | Path = ''
 
+    properties: dict[str, str] = {}
+
     def __init__(self, sheets: Sequence[Path|str], path: str | Path = '', xml: str = ''):
         """Initializes the TMXpy class"""
         
@@ -137,6 +139,15 @@ class TMXpy:
                 }
 
         self.maxGID = len(self.tiles)
+
+    def generateMapPropertiesDict(self) -> None:
+        """Generates a dictionary map properties"""
+        properties = self.inputFile.find('properties') # There are multiple <properties />, but the first will always be map properties.
+        for property in properties.find_all('property'): # type: ignore
+            property = cast(bs4.Tag, property)
+
+            self.properties[property.attrs['name']] = property.attrs['value']
+
 
     def findPathOfTileSheet(self, sheet: str, ext: str = '') -> str:
         """Finds the folder containing the given sheet"""
@@ -327,6 +338,23 @@ class TMXpy:
 
         if 'warps' in self.__dict__:
             self.inputFile.find("property", {"name": "Warp"})['value'] = " ".join([f"{w['map_x']} {w['map_y']} {w['destination']} {w['dest_x']} {w['dest_y']}" for w in self.warps]) # type: ignore
+
+        if {} != self.properties:
+            og_properties = cast(bs4.Tag, self.inputFile.find('properties'))
+
+            new_properties = self.inputFile.new_tag('properties')
+            for key, value in self.properties.items():
+                # Create a <property> tag for each key-value pair in the dictionary
+                property_tag = self.inputFile.new_tag("property", attrs={
+                    "name": key,
+                    "type": 'string',
+                    "value": value
+                })
+                new_properties.append(property_tag)
+
+            # Replace the original element with the new one
+            og_properties.replace_with(new_properties)
+
 
         with open(path, "w") as f:
             f.write(self.inputFile.prettify())

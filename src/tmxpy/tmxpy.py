@@ -262,7 +262,7 @@ class TMXpy:
             self.parseWarps()
         self.warps[index] = warp
 
-    def setTile(self, x: int, y: int, tile: str, layerID: int = -1, layerName: str = "") -> None:
+    def setTile(self, x: int, y: int, tile: str | int, layerID: int = -1, layerName: str = "") -> None:
         """Sets a tile in the TMX file"""
         if layerID > -1:
             layer = self.inputFile.find("layer", {"id": str(layerID)})
@@ -276,7 +276,7 @@ class TMXpy:
         rows = [x for x in layer.text.split("\n") if str(x) not in ["", " ", [], [""], [" "]]]
         columns = rows[y].split(",")
         
-        columns[x] = tile
+        columns[x] = str(tile)
         rows[y] = ",".join(columns)
         output = "\n".join(rows)
         
@@ -336,7 +336,7 @@ class TMXpy:
 
     def save(self, path: str or Path):
 
-        if 'warps' in self.__dict__:
+        if self.warps != []:
             self.inputFile.find("property", {"name": "Warp"})['value'] = " ".join([f"{w['map_x']} {w['map_y']} {w['destination']} {w['dest_x']} {w['dest_y']}" for w in self.warps]) # type: ignore
 
         if {} != self.properties:

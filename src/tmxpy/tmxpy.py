@@ -13,7 +13,7 @@ from typing import cast, Literal
 
 def XMLtoCSV(inPath: str, outPath: str | None, outputType: Literal['file', 'text'] = 'file') -> None | str:  
     """Converts an XML-encoded TMX file to CSV formatting."""
-    soup = bs4.BeautifulSoup(codecs.open(inPath, 'r', encoding='utf8'), "xml")
+    soup = bs4.BeautifulSoup(open(inPath, encoding='utf8'), "xml")
     
     for layer in soup.find_all('layer'):
         layer = cast(bs4.Tag, layer)
@@ -42,6 +42,9 @@ def XMLtoCSV(inPath: str, outPath: str | None, outputType: Literal['file', 'text
                 csv_oneline_split[i + 1] = '\n' + csv_oneline_split[i + 1]
 
         csv = ','.join(csv_oneline_split)
+        
+        if csv.endswith(','):
+            csv = csv[0:-1]
 
         data.string = csv
         data.attrs['encoding'] = 'csv'

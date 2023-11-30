@@ -6,7 +6,7 @@ import json, os
 INPUT_TMX = str(Path.joinpath(
     Path(os.getcwd()), 
     Path('tests'), 
-    Path('Farm-XML.tmx')
+    Path('Backwoods-XML.tmx')
 ))
 
 XMLtoCSV(INPUT_TMX, INPUT_TMX.replace('-XML', '-CSV'))

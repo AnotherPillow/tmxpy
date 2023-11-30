@@ -3,6 +3,7 @@ from pathlib import Path
 from PIL import Image
 import os
 import re
+import codecs
 from collections.abc import Sequence
 from typing import cast, Literal
 
@@ -12,7 +13,7 @@ from typing import cast, Literal
 
 def XMLtoCSV(inPath: str, outPath: str | None, outputType: Literal['file', 'text'] = 'file') -> None | str:  
     """Converts an XML-encoded TMX file to CSV formatting."""
-    soup = bs4.BeautifulSoup(open(inPath, encoding='utf8'), "xml")
+    soup = bs4.BeautifulSoup(codecs.open(inPath, 'r', encoding='utf8'), "xml")
     
     for layer in soup.find_all('layer'):
         layer = cast(bs4.Tag, layer)

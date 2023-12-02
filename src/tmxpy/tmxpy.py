@@ -277,14 +277,18 @@ class TMXpy:
         if layer is None:
             raise Exception("TMXpy: Layer not found")
         
+        data = layer.find('data')
+        
         rows = [x for x in layer.text.split("\n") if str(x) not in ["", " ", [], [""], [" "]]]
+        if y >= len(rows):
+            return None
         columns = rows[y].split(",")
         
         columns[x] = str(tile)
         rows[y] = ",".join(columns)
         output = "\n".join(rows)
         
-        layer.contents[0].replace_with(output) # type: ignore <-- like wtf pylint why what is this
+        data.contents[0].replace_with(output) # type: ignore <-- like wtf pylint why what is this
 
     def addTilesheet(self, filename: str, setname: str, tileproperties: dict[str, list]) -> None:
         #loop through the sheet dirs, check if filename exists in any of them

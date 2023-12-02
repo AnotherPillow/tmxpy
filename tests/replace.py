@@ -24,5 +24,4 @@ print(tmx.warps)
 
 # tmx.generateGIDDict()
 # tmx.renderAllLayers().save("tests\\Farm-warp-tile-replaced.png")
-
 tmx.save(f'tests\\Farm-warp-tile-replaced.tmx')

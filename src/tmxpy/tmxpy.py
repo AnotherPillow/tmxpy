@@ -291,7 +291,6 @@ class TMXpy:
         data.contents[0].replace_with(output) # type: ignore <-- like wtf pylint why what is this
 
     def addTilesheet(self, filename: str, setname: str, tileproperties: dict[str, list]) -> None:
-        #loop through the sheet dirs, check if filename exists in any of them
         imgpath = self.findPathOfTileSheet(filename, ".png")
         img = Image.open(imgpath)
         
@@ -352,7 +351,6 @@ class TMXpy:
 
             new_properties = self.inputFile.new_tag('properties')
             for key, value in self.properties.items():
-                # Create a <property> tag for each key-value pair in the dictionary
                 property_tag = self.inputFile.new_tag("property", attrs={
                     "name": key,
                     "type": 'string',
@@ -360,7 +358,6 @@ class TMXpy:
                 })
                 new_properties.append(property_tag)
 
-            # Replace the original element with the new one
             og_properties.replace_with(new_properties)
 
 

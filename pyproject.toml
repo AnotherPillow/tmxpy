@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "tmxpy"
 version = "0.2.6"
 authors = [
-  { name="AnotherPillow", email="redacted@email.xyz" }
+  { name="AnotherPillow", email="programming@pillow.rocks" }
 ]
 description = "A Python library for reading and writing TMX files."
 readme = "README.md"
